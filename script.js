@@ -157,7 +157,7 @@ class OrderBookStore {
         };
     }
 
-    updateOrderBook(symbol, ask, bid) {
+    updateOrderBook(symbol, ask, bid, timestamp) {
         const data = this._data[symbol.toString()];
         if (data) {
             let bestChanged = false;
@@ -168,7 +168,7 @@ class OrderBookStore {
                 bestChanged |= updateIndex(data.bid, v, getSortedIndex(data.bid, v.price, true));
             });
             if (bestChanged && this._onChangeBest) {
-                this._onChangeBest(symbol, data.ask.length > 0 ? data.ask[0].price : null, data.bid.length > 0 ? data.bid[0].price : null);
+                this._onChangeBest(symbol, data.ask.length > 0 ? data.ask[0].price : null, data.bid.length > 0 ? data.bid[0].price : null, timestamp);
             }
         }
     }
@@ -184,8 +184,8 @@ function generateRandom() {
 }
 
 logger.info('Start application');
-const orderBooks = new OrderBookStore((symbol, bestASk, bestBid) => {
-    logger.info('New best orderbook', symbol, bestASk, bestBid);
+const orderBooks = new OrderBookStore((symbol, bestASk, bestBid, timestamp) => {
+    logger.info('New best orderbook', symbol, bestASk, bestBid, timestamp);
 });
 const socketApi = new SocketClient(async () => {
     try {
@@ -214,5 +214,5 @@ socketApi.setHandler('snapshotOrderbook', params => {
     orderBooks.snapshotOrderBook(params.symbol, params.ask, params.bid);
 });
 socketApi.setHandler('updateOrderbook', params => {
-    orderBooks.updateOrderBook(params.symbol, params.ask, params.bid);
+    orderBooks.updateOrderBook(params.symbol, params.ask, params.bid, params.timestamp);
 });
