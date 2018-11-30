@@ -151,13 +151,31 @@ class OrderBookStore {
     }
 
     snapshotOrderBook(symbol, ask, bid) {
+		console.log('snapshot of OrderBook');
         this._data[symbol.toString()] = {
             ask: ask,
             bid: bid
         };
+		//console.log(this._data['BTCUSD']);
+		const dataTable = $('#realtime').DataTable({
+		  data: this._data['BTCUSD'].bid,
+		  order: [[0, 'desc']],
+		  searching: false,
+		  paging: true,
+		  columns: [
+			/*{ title: 'Ask Price' , data: "ask.price"},
+			{ title: 'Ask Size' , data: "ask"},*/
+			{ title: 'Bid Price' , data: "price"},
+			{ title: 'Bid Size' , data: "size"}
+		  ],
+		  destroy:true
+		});
     }
 
     updateOrderBook(symbol, ask, bid, timestamp) {
+		/*
+		Want to handle the updateOrderbook method, but don't display any updates
+		* /
         const data = this._data[symbol.toString()];
         if (data) {
             let bestChanged = false;
@@ -171,6 +189,7 @@ class OrderBookStore {
                 this._onChangeBest(symbol, data.ask.length > 0 ? data.ask[0].price : null, data.bid.length > 0 ? data.bid[0].price : null, timestamp);
             }
         }
+		/**/
     }
 }
 
@@ -213,6 +232,8 @@ const socketApi = new SocketClient(async () => {
 socketApi.setHandler('snapshotOrderbook', params => {
     orderBooks.snapshotOrderBook(params.symbol, params.ask, params.bid);
 });
+
 socketApi.setHandler('updateOrderbook', params => {
     orderBooks.updateOrderBook(params.symbol, params.ask, params.bid, params.timestamp);
 });
+/**/
